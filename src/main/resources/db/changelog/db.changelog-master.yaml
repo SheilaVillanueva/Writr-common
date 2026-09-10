@@ -1,15 +1,16 @@
 databaseChangeLog:
-  - changeSet:
-      id: 1
-      author: equipo
-      changes:
-        - createTable:
-            tableName: prueba_liquibase
-            columns:
-              - column:
-                  name: id
-                  type: BIGINT
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
+
+  - include:
+      file: db/changelog/001-tablas-base.yaml
+
+  - include:
+      file: db/changelog/002-tablas-documentos.yaml
+
+  - include:
+      file: db/changelog/003-tablas-interaccion.yaml
+
+  - include:
+      file: db/changelog/004-tablas-reportes.yaml
+
+  - include:
+      file: db/changelog/005-tablas-publicidad.yaml
