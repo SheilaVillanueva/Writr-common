@@ -1,10 +1,13 @@
 package com.example.commons.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -17,7 +20,9 @@ import java.time.OffsetDateTime;
 @Setter
 @Entity
 @Table(name = "publicidad")
-public class Publicidad {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "tipo")
+public abstract class Publicidad {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,17 +31,6 @@ public class Publicidad {
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
-
-    @Column(name = "tipo", length = 30, nullable = false)
-    private String tipo;
-
-    @ManyToOne
-    @JoinColumn(name = "id_strike")
-    private Strike strike;
-
-    @ManyToOne
-    @JoinColumn(name = "id_documento")
-    private Documento documento;
 
     @Column(name = "asunto", length = 255, nullable = false)
     private String asunto;
