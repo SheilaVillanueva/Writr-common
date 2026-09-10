@@ -1,0 +1,151 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 020-publicidad
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: publicidad
+            columns:
+
+              - column:
+                  name: id_publicidad
+                  type: INTEGER
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_publicidad
+
+              - column:
+                  name: id_usuario
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: tipo
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: id_strike
+                  type: INTEGER
+
+              - column:
+                  name: id_documento
+                  type: INTEGER
+
+              - column:
+                  name: asunto
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: mensaje
+                  type: TEXT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: fecha_programada
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: publicidad
+            baseColumnNames: id_usuario
+            referencedTableName: usuario
+            referencedColumnNames: id_usuario
+            constraintName: fk_publicidad_usuario
+
+        - addForeignKeyConstraint:
+            baseTableName: publicidad
+            baseColumnNames: id_strike
+            referencedTableName: strike
+            referencedColumnNames: id_strike
+            constraintName: fk_publicidad_strike
+
+        - addForeignKeyConstraint:
+            baseTableName: publicidad
+            baseColumnNames: id_documento
+            referencedTableName: documento
+            referencedColumnNames: id_documento
+            constraintName: fk_publicidad_documento
+
+        - sql:
+            sql: >
+              ALTER TABLE publicidad
+              ADD CONSTRAINT ck_publicidad_tipo
+              CHECK (tipo IN ('strike', 'promocion_libro'));
+
+  - changeSet:
+      id: 021-publicidad-usuario
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: publicidad_usuario
+            columns:
+
+              - column:
+                  name: id_publicidad_usuario
+                  type: INTEGER
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_publicidad_usuario
+
+              - column:
+                  name: id_publicidad
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: id_usuario
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: fecha_envio
+                  type: TIMESTAMP WITH TIME ZONE
+
+              - column:
+                  name: estado
+                  type: VARCHAR(20)
+                  defaultValue: pendiente
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: publicidad_usuario
+            baseColumnNames: id_publicidad
+            referencedTableName: publicidad
+            referencedColumnNames: id_publicidad
+            constraintName: fk_publicidad_usuario_publicidad
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: publicidad_usuario
+            baseColumnNames: id_usuario
+            referencedTableName: usuario
+            referencedColumnNames: id_usuario
+            constraintName: fk_publicidad_usuario_usuario
+
+        - addUniqueConstraint:
+            tableName: publicidad_usuario
+            columnNames: id_publicidad, id_usuario
+            constraintName: uk_publicidad_usuario
+
+        - sql:
+            sql: >
+              ALTER TABLE publicidad_usuario
+              ADD CONSTRAINT ck_publicidad_usuario_estado
+              CHECK (estado IN ('pendiente', 'enviado', 'fallido'));

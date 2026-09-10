@@ -1,0 +1,306 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 007-seguidor
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: seguidor
+            columns:
+
+              - column:
+                  name: id_seguidor
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_seguidor
+
+              - column:
+                  name: id_seguido
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_seguidor
+
+              - column:
+                  name: fecha_inicio
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: estado
+                  type: VARCHAR(20)
+                  defaultValue: aceptado
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: seguidor
+            baseColumnNames: id_seguidor
+            referencedTableName: usuario
+            referencedColumnNames: id_usuario
+            constraintName: fk_seguidor_usuario
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: seguidor
+            baseColumnNames: id_seguido
+            referencedTableName: usuario
+            referencedColumnNames: id_usuario
+            constraintName: fk_seguido_usuario
+            onDelete: CASCADE
+
+        - sql:
+            sql: >
+              ALTER TABLE seguidor
+              ADD CONSTRAINT ck_seguidor_estado
+              CHECK (estado IN ('aceptado', 'pendiente'));
+
+        - sql:
+            sql: >
+              ALTER TABLE seguidor
+              ADD CONSTRAINT ck_seguidor_distinto
+              CHECK (id_seguidor <> id_seguido);
+
+  - changeSet:
+      id: 008-comentario
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: comentario
+            columns:
+
+              - column:
+                  name: id_comentario
+                  type: INTEGER
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_comentario
+
+              - column:
+                  name: id_documento
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: id_usuario
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: id_comentario_padre
+                  type: INTEGER
+
+              - column:
+                  name: contenido
+                  type: TEXT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: fecha
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: estado
+                  type: VARCHAR(20)
+                  defaultValue: activo
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: comentario
+            baseColumnNames: id_documento
+            referencedTableName: documento
+            referencedColumnNames: id_documento
+            constraintName: fk_comentario_documento
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: comentario
+            baseColumnNames: id_usuario
+            referencedTableName: usuario
+            referencedColumnNames: id_usuario
+            constraintName: fk_comentario_usuario
+
+        - addForeignKeyConstraint:
+            baseTableName: comentario
+            baseColumnNames: id_comentario_padre
+            referencedTableName: comentario
+            referencedColumnNames: id_comentario
+            constraintName: fk_comentario_padre
+
+        - sql:
+            sql: >
+              ALTER TABLE comentario
+              ADD CONSTRAINT ck_comentario_estado
+              CHECK (estado IN ('activo', 'eliminado'));
+
+  - changeSet:
+      id: 009-me-gusta
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: me_gusta
+            columns:
+
+              - column:
+                  name: id_usuario
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_me_gusta
+
+              - column:
+                  name: id_documento
+                  type: INTEGER
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_me_gusta
+
+              - column:
+                  name: fecha
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: me_gusta
+            baseColumnNames: id_usuario
+            referencedTableName: usuario
+            referencedColumnNames: id_usuario
+            constraintName: fk_me_gusta_usuario
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: me_gusta
+            baseColumnNames: id_documento
+            referencedTableName: documento
+            referencedColumnNames: id_documento
+            constraintName: fk_me_gusta_documento
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 010-tag
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: tag
+            columns:
+
+              - column:
+                  name: id_tag
+                  type: INTEGER
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_tag
+
+              - column:
+                  name: nombre
+                  type: VARCHAR(80)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_tag_nombre
+
+  - changeSet:
+      id: 011-documento-tag
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: documento_tag
+            columns:
+
+              - column:
+                  name: id_documento
+                  type: INTEGER
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_documento_tag
+
+              - column:
+                  name: id_tag
+                  type: INTEGER
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_documento_tag
+
+        - addForeignKeyConstraint:
+            baseTableName: documento_tag
+            baseColumnNames: id_documento
+            referencedTableName: documento
+            referencedColumnNames: id_documento
+            constraintName: fk_documento_tag_documento
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: documento_tag
+            baseColumnNames: id_tag
+            referencedTableName: tag
+            referencedColumnNames: id_tag
+            constraintName: fk_documento_tag_tag
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 012-usuario-interes
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: usuario_interes
+            columns:
+
+              - column:
+                  name: id_usuario
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_usuario_interes
+
+              - column:
+                  name: id_tag
+                  type: INTEGER
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_usuario_interes
+
+        - addForeignKeyConstraint:
+            baseTableName: usuario_interes
+            baseColumnNames: id_usuario
+            referencedTableName: usuario
+            referencedColumnNames: id_usuario
+            constraintName: fk_usuario_interes_usuario
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: usuario_interes
+            baseColumnNames: id_tag
+            referencedTableName: tag
+            referencedColumnNames: id_tag
+            constraintName: fk_usuario_interes_tag
+            onDelete: CASCADE

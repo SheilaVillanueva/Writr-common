@@ -1,0 +1,399 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 013-motivo-reporte
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: motivo_reporte
+            columns:
+
+              - column:
+                  name: id_motivo
+                  type: INTEGER
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_motivo_reporte
+
+              - column:
+                  name: descripcion
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 014-reporte-usuario
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: reporte_usuario
+            columns:
+
+              - column:
+                  name: id_reporte
+                  type: INTEGER
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_reporte_usuario
+
+              - column:
+                  name: id_usuario_reportado
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: id_usuario_reporta
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: id_motivo
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: fecha
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: estado
+                  type: VARCHAR(20)
+                  defaultValue: pendiente
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: reporte_usuario
+            baseColumnNames: id_usuario_reportado
+            referencedTableName: usuario
+            referencedColumnNames: id_usuario
+            constraintName: fk_reporte_usuario_reportado
+
+        - addForeignKeyConstraint:
+            baseTableName: reporte_usuario
+            baseColumnNames: id_usuario_reporta
+            referencedTableName: usuario
+            referencedColumnNames: id_usuario
+            constraintName: fk_reporte_usuario_reporta
+
+        - addForeignKeyConstraint:
+            baseTableName: reporte_usuario
+            baseColumnNames: id_motivo
+            referencedTableName: motivo_reporte
+            referencedColumnNames: id_motivo
+            constraintName: fk_reporte_usuario_motivo
+
+        - sql:
+            sql: >
+              ALTER TABLE reporte_usuario
+              ADD CONSTRAINT ck_reporte_usuario_estado
+              CHECK (estado IN ('pendiente', 'revisado', 'descartado'));
+
+        - sql:
+            sql: >
+              ALTER TABLE reporte_usuario
+              ADD CONSTRAINT ck_reporte_usuario_distinto
+              CHECK (id_usuario_reportado <> id_usuario_reporta);
+
+  - changeSet:
+      id: 015-reporte-documento
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: reporte_documento
+            columns:
+
+              - column:
+                  name: id_reporte
+                  type: INTEGER
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_reporte_documento
+
+              - column:
+                  name: id_documento
+                  type: INTEGER
+
+              - column:
+                  name: id_comentario
+                  type: INTEGER
+
+              - column:
+                  name: id_usuario_reporta
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: id_motivo
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: fecha
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: estado
+                  type: VARCHAR(20)
+                  defaultValue: pendiente
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: reporte_documento
+            baseColumnNames: id_documento
+            referencedTableName: documento
+            referencedColumnNames: id_documento
+            constraintName: fk_reporte_documento_documento
+
+        - addForeignKeyConstraint:
+            baseTableName: reporte_documento
+            baseColumnNames: id_comentario
+            referencedTableName: comentario
+            referencedColumnNames: id_comentario
+            constraintName: fk_reporte_documento_comentario
+
+        - addForeignKeyConstraint:
+            baseTableName: reporte_documento
+            baseColumnNames: id_usuario_reporta
+            referencedTableName: usuario
+            referencedColumnNames: id_usuario
+            constraintName: fk_reporte_documento_usuario
+
+        - addForeignKeyConstraint:
+            baseTableName: reporte_documento
+            baseColumnNames: id_motivo
+            referencedTableName: motivo_reporte
+            referencedColumnNames: id_motivo
+            constraintName: fk_reporte_documento_motivo
+
+        - sql:
+            sql: >
+              ALTER TABLE reporte_documento
+              ADD CONSTRAINT ck_reporte_documento_estado
+              CHECK (estado IN ('pendiente', 'revisado', 'descartado'));
+
+        - sql:
+            sql: >
+              ALTER TABLE reporte_documento
+              ADD CONSTRAINT ck_reporte_documento_objetivo
+              CHECK (
+                (id_documento IS NOT NULL AND id_comentario IS NULL)
+                OR
+                (id_documento IS NULL AND id_comentario IS NOT NULL)
+              );
+
+  - changeSet:
+      id: 016-strike
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: strike
+            columns:
+
+              - column:
+                  name: id_strike
+                  type: INTEGER
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_strike
+
+              - column:
+                  name: id_usuario
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: id_admin_moderador
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: fecha
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: strike
+            baseColumnNames: id_usuario
+            referencedTableName: usuario
+            referencedColumnNames: id_usuario
+            constraintName: fk_strike_usuario
+
+        - addForeignKeyConstraint:
+            baseTableName: strike
+            baseColumnNames: id_admin_moderador
+            referencedTableName: usuario
+            referencedColumnNames: id_usuario
+            constraintName: fk_strike_admin
+
+  - changeSet:
+      id: 017-strike-motivo
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: strike_motivo
+            columns:
+
+              - column:
+                  name: id_strike
+                  type: INTEGER
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_strike_motivo
+
+              - column:
+                  name: id_motivo
+                  type: INTEGER
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_strike_motivo
+
+        - addForeignKeyConstraint:
+            baseTableName: strike_motivo
+            baseColumnNames: id_strike
+            referencedTableName: strike
+            referencedColumnNames: id_strike
+            constraintName: fk_strike_motivo_strike
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: strike_motivo
+            baseColumnNames: id_motivo
+            referencedTableName: motivo_reporte
+            referencedColumnNames: id_motivo
+            constraintName: fk_strike_motivo_motivo
+
+  - changeSet:
+      id: 018-sesion-usuario
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: sesion_usuario
+            columns:
+
+              - column:
+                  name: id_sesion
+                  type: INTEGER
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_sesion_usuario
+
+              - column:
+                  name: id_usuario
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: fecha_inicio
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: fecha_fin
+                  type: TIMESTAMP WITH TIME ZONE
+
+        - addForeignKeyConstraint:
+            baseTableName: sesion_usuario
+            baseColumnNames: id_usuario
+            referencedTableName: usuario
+            referencedColumnNames: id_usuario
+            constraintName: fk_sesion_usuario
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 019-reporte-sistema-diario
+      author: equipo
+      changes:
+
+        - createTable:
+            tableName: reporte_sistema_diario
+            columns:
+
+              - column:
+                  name: id_reporte
+                  type: INTEGER
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    primaryKeyName: pk_reporte_sistema_diario
+
+              - column:
+                  name: fecha
+                  type: DATE
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_reporte_sistema_fecha
+
+              - column:
+                  name: nuevos_usuarios
+                  type: INTEGER
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: usuarios_unicos
+                  type: INTEGER
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: promedio_online
+                  type: NUMERIC(10,2)
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: peak_online
+                  type: INTEGER
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: documentos_creados
+                  type: INTEGER
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
