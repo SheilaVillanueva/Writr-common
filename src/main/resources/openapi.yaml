@@ -1,0 +1,454 @@
+openapi: 3.0.3
+info:
+  title: Writr - API commons
+  description: >
+    Contrato de la API basado en el modelo de entities JPA
+    del proyecto (paquete com.example.commons.entity). Esta entrega solo
+    define el contrato (schemas)
+  version: 1.0.0
+
+paths: {}
+
+components:
+  schemas:
+
+    # ---------- Usuario ----------
+    Usuario:
+      type: object
+      properties:
+        idUsuario:
+          type: string
+          format: uuid
+        nombre:
+          type: string
+          maxLength: 120
+        email:
+          type: string
+          maxLength: 255
+        helperSupervisorId:
+          type: string
+          format: uuid
+          nullable: true
+        esPrivada:
+          type: boolean
+        comentariosHabilitados:
+          type: boolean
+        cantidadStrikes:
+          type: integer
+        estadoCuenta:
+          type: string
+          maxLength: 30
+        fechaMarcadoEliminacion:
+          type: string
+          format: date-time
+          nullable: true
+        fechaRegistro:
+          type: string
+          format: date-time
+      required: [idUsuario, nombre, email, esPrivada, comentariosHabilitados, cantidadStrikes, estadoCuenta, fechaRegistro]
+
+    # ---------- Documento ----------
+    Documento:
+      type: object
+      properties:
+        idDocumento:
+          type: integer
+          format: int32
+        usuarioId:
+          type: string
+          format: uuid
+          nullable: true
+        titulo:
+          type: string
+          maxLength: 255
+        contenido:
+          type: string
+        fechaPublicacion:
+          type: string
+          format: date-time
+        estado:
+          type: string
+          maxLength: 20
+      required: [idDocumento, titulo, contenido, fechaPublicacion, estado]
+
+    # ---------- Tag ----------
+    Tag:
+      type: object
+      properties:
+        idTag:
+          type: integer
+          format: int32
+        nombre:
+          type: string
+          maxLength: 80
+      required: [idTag, nombre]
+
+    # ---------- DocumentoTag (join documento-tag) ----------
+    DocumentoTag:
+      type: object
+      description: Relación N:M entre Documento y Tag
+      properties:
+        documentoId:
+          type: integer
+          format: int32
+        tagId:
+          type: integer
+          format: int32
+      required: [documentoId, tagId]
+
+    # ---------- Comentario ----------
+    Comentario:
+      type: object
+      properties:
+        idComentario:
+          type: integer
+          format: int32
+        documentoId:
+          type: integer
+          format: int32
+        usuarioId:
+          type: string
+          format: uuid
+        comentarioPadreId:
+          type: integer
+          format: int32
+          nullable: true
+        contenido:
+          type: string
+        fecha:
+          type: string
+          format: date-time
+        estado:
+          type: string
+          maxLength: 20
+      required: [idComentario, documentoId, usuarioId, contenido, fecha, estado]
+
+    # ---------- MeGusta (like a un documento) ----------
+    MeGusta:
+      type: object
+      description: Relación N:M entre Usuario y Documento (likes)
+      properties:
+        usuarioId:
+          type: string
+          format: uuid
+        documentoId:
+          type: integer
+          format: int32
+        fecha:
+          type: string
+          format: date-time
+      required: [usuarioId, documentoId, fecha]
+
+    # ---------- Lista ----------
+    Lista:
+      type: object
+      properties:
+        idLista:
+          type: integer
+          format: int32
+        usuarioId:
+          type: string
+          format: uuid
+        nombre:
+          type: string
+          maxLength: 150
+        descripcion:
+          type: string
+          nullable: true
+        fechaCreacion:
+          type: string
+          format: date-time
+      required: [idLista, usuarioId, nombre, fechaCreacion]
+
+    # ---------- ListaLecturaDocumento ----------
+    ListaLecturaDocumento:
+      type: object
+      description: Documentos incluidos en una Lista
+      properties:
+        idListaLecturaDocumento:
+          type: integer
+          format: int32
+        listaId:
+          type: integer
+          format: int32
+        documentoId:
+          type: integer
+          format: int32
+        fechaAgregado:
+          type: string
+          format: date-time
+        orden:
+          type: integer
+          format: int32
+      required: [idListaLecturaDocumento, listaId, documentoId, fechaAgregado, orden]
+
+    # ---------- ListaLecturaUsuario ----------
+    ListaLecturaUsuario:
+      type: object
+      description: Usuarios que se unieron/siguen una Lista
+      properties:
+        usuarioId:
+          type: string
+          format: uuid
+        listaId:
+          type: integer
+          format: int32
+        fechaUnion:
+          type: string
+          format: date-time
+      required: [usuarioId, listaId, fechaUnion]
+
+    # ---------- Seguidor ----------
+    Seguidor:
+      type: object
+      description: Relación de seguimiento entre dos usuarios
+      properties:
+        seguidorId:
+          type: string
+          format: uuid
+        seguidoId:
+          type: string
+          format: uuid
+        fechaInicio:
+          type: string
+          format: date-time
+        estado:
+          type: string
+          maxLength: 20
+      required: [seguidorId, seguidoId, fechaInicio, estado]
+
+    # ---------- UsuarioInteres ----------
+    UsuarioInteres:
+      type: object
+      description: Relación N:M entre Usuario y Tag (intereses)
+      properties:
+        usuarioId:
+          type: string
+          format: uuid
+        tagId:
+          type: integer
+          format: int32
+      required: [usuarioId, tagId]
+
+    # ---------- MotivoReporte ----------
+    MotivoReporte:
+      type: object
+      properties:
+        idMotivo:
+          type: integer
+          format: int32
+        descripcion:
+          type: string
+          maxLength: 255
+      required: [idMotivo, descripcion]
+
+    # ---------- ReporteDocumento ----------
+    ReporteDocumento:
+      type: object
+      properties:
+        idReporte:
+          type: integer
+          format: int32
+        documentoId:
+          type: integer
+          format: int32
+          nullable: true
+        comentarioId:
+          type: integer
+          format: int32
+          nullable: true
+        usuarioReportaId:
+          type: string
+          format: uuid
+        motivoId:
+          type: integer
+          format: int32
+        fecha:
+          type: string
+          format: date-time
+        estado:
+          type: string
+          maxLength: 20
+      required: [idReporte, usuarioReportaId, motivoId, fecha, estado]
+
+    # ---------- ReporteUsuario ----------
+    ReporteUsuario:
+      type: object
+      properties:
+        idReporte:
+          type: integer
+          format: int32
+        usuarioReportadoId:
+          type: string
+          format: uuid
+        usuarioReportaId:
+          type: string
+          format: uuid
+        motivoId:
+          type: integer
+          format: int32
+        fecha:
+          type: string
+          format: date-time
+        estado:
+          type: string
+          maxLength: 20
+      required: [idReporte, usuarioReportadoId, usuarioReportaId, motivoId, fecha, estado]
+
+    # ---------- ReporteSistemaDiario ----------
+    ReporteSistemaDiario:
+      type: object
+      properties:
+        idReporte:
+          type: integer
+          format: int32
+        fecha:
+          type: string
+          format: date
+        nuevosUsuarios:
+          type: integer
+          format: int32
+        usuariosUnicos:
+          type: integer
+          format: int32
+        promedioOnline:
+          type: number
+          format: double
+        peakOnline:
+          type: integer
+          format: int32
+        documentosCreados:
+          type: integer
+          format: int32
+      required: [idReporte, fecha, nuevosUsuarios, usuariosUnicos, promedioOnline, peakOnline, documentosCreados]
+
+    # ---------- Strike ----------
+    Strike:
+      type: object
+      properties:
+        idStrike:
+          type: integer
+          format: int32
+        usuarioId:
+          type: string
+          format: uuid
+        adminModeradorId:
+          type: string
+          format: uuid
+        fecha:
+          type: string
+          format: date-time
+      required: [idStrike, usuarioId, adminModeradorId, fecha]
+
+    # ---------- StrikeMotivo ----------
+    StrikeMotivo:
+      type: object
+      description: Relación N:M entre Strike y MotivoReporte
+      properties:
+        strikeId:
+          type: integer
+          format: int32
+        motivoId:
+          type: integer
+          format: int32
+      required: [strikeId, motivoId]
+
+    # ---------- SesionUsuario ----------
+    SesionUsuario:
+      type: object
+      properties:
+        idSesion:
+          type: integer
+          format: int32
+        usuarioId:
+          type: string
+          format: uuid
+        fechaInicio:
+          type: string
+          format: date-time
+        fechaFin:
+          type: string
+          format: date-time
+          nullable: true
+      required: [idSesion, usuarioId, fechaInicio]
+
+    # ---------- Configuracion ----------
+    Configuracion:
+      type: object
+      properties:
+        clave:
+          type: string
+          maxLength: 80
+        valor:
+          type: string
+      required: [clave, valor]
+
+    # ---------- Publicidad (base, herencia) ----------
+    Publicidad:
+      type: object
+      description: >
+        Clase base abstracta (SINGLE_TABLE, discriminador "tipo") de la
+        jerarquía Publicidad. 
+      properties:
+        idPublicidad:
+          type: integer
+          format: int32
+        usuarioId:
+          type: string
+          format: uuid
+        asunto:
+          type: string
+          maxLength: 255
+        mensaje:
+          type: string
+        fechaProgramada:
+          type: string
+          format: date-time
+        tipo:
+          type: string
+          description: Discriminador de la jerarquía (columna "tipo", @DiscriminatorColumn)
+      required: [idPublicidad, usuarioId, asunto, mensaje, fechaProgramada, tipo]
+
+    PublicidadLibro:
+      description: Subtipo de Publicidad (discriminator "promocion_libro")
+      allOf:
+        - $ref: '#/components/schemas/Publicidad'
+        - type: object
+          properties:
+            documentoId:
+              type: integer
+              format: int32
+              nullable: true
+
+    PublicidadStrike:
+      description: Subtipo de Publicidad (discriminator "strike")
+      allOf:
+        - $ref: '#/components/schemas/Publicidad'
+        - type: object
+          properties:
+            strikeId:
+              type: integer
+              format: int32
+              nullable: true
+
+    # ---------- PublicidadUsuario ----------
+    PublicidadUsuario:
+      type: object
+      properties:
+        idPublicidadUsuario:
+          type: integer
+          format: int32
+        publicidadId:
+          type: integer
+          format: int32
+        usuarioId:
+          type: string
+          format: uuid
+        fechaEnvio:
+          type: string
+          format: date-time
+          nullable: true
+        estado:
+          type: string
+          maxLength: 20
+      required: [idPublicidadUsuario, publicidadId, usuarioId, estado]
